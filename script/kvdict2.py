@@ -3,10 +3,12 @@
 # gusimiu@baidu.com
 # 
 
-import time
-import sys
-import c_kvdict2
 import logging
+import sys
+import time
+
+import c_kvdict2
+
 
 class KVDict:
     def __init__(self):
@@ -16,7 +18,7 @@ class KVDict:
     def load(self, filename):
         logging.info('LOAD: %s' % filename)
         print >> sys.stderr, 'loading: %s' % (filename)
-        c_kvdict2.load(self.__dict_handle, filename, True )
+        c_kvdict2.load(self.__dict_handle, filename, True)
 
     def find(self, key):
         return c_kvdict2.find(self.__dict_handle, key)
@@ -32,6 +34,12 @@ class KVDict:
         print >> sys.stderr, 'loading: %s' % (input_file)
         return c_kvdict2.load_mem_bin(self.__dict_handle, input_file)
 
+    def __getitem__(self, item):
+        return c_kvdict2.find(self.__dict_handle, item)
+
+    def __contains__(self, item):
+        return c_kvdict2.has(self.__dict_handle, item)
+
 
 class FileIndexKVDict:
     def __init__(self):
@@ -39,14 +47,14 @@ class FileIndexKVDict:
         logging.info('GET C_KVDICT : handle=%d' % self.__dict_handle)
 
     def load(self, filename):
-        c_kvdict2.load(self.__dict_handle, filename, False )
+        c_kvdict2.load(self.__dict_handle, filename, False)
 
     def load_index(self, index_file, filename):
         return c_kvdict2.load_index_and_files(
-                self.__dict_handle, index_file, filename)
+            self.__dict_handle, index_file, filename)
 
     def write_index(self, output_file):
-        return c_kvdict2.write_index( self.__dict_handle, output_file )
+        return c_kvdict2.write_index(self.__dict_handle, output_file)
 
     def find(self, key):
         return c_kvdict2.find(self.__dict_handle, key)
@@ -54,9 +62,16 @@ class FileIndexKVDict:
     def has(self, key):
         return c_kvdict2.has(self.__dict_handle, key)
 
+    def __getitem__(self, item):
+        return c_kvdict2.find(self.__dict_handle, item)
 
-if __name__=='__main__':
+    def __contains__(self, item):
+        return c_kvdict2.has(self.__dict_handle, item)
+
+
+if __name__ == '__main__':
     from pygsm.arg import *
+
     arg = Arg()
     arg.str_opt('bin', 'i', 'load bin list')
     arg.str_opt('filename', 'f', 'input text file.')
@@ -66,7 +81,8 @@ if __name__=='__main__':
 
     if opt.calc_size:
         key_num = int(opt.calc_size)
-        print >> sys.stderr, 'KeyNum:%d * KeyInfoSize:16 bytes = %d = %d(M)' % (key_num, 16*key_num, 16*key_num/(2**20))
+        print >> sys.stderr, 'KeyNum:%d * KeyInfoSize:16 bytes = %d = %d(M)' % (
+            key_num, 16 * key_num, 16 * key_num / (2 ** 20))
         sys.exit(0)
 
     d = KVDict()
@@ -107,7 +123,7 @@ if __name__=='__main__':
     end = time.time()
 
     during_time = end - beg
-    if counter>0:
+    if counter > 0:
         avg_time = during_time / counter
         logging.info('TIME      = %.4f(s)' % during_time)
         logging.info('COUNTER   = %4d' % counter)
